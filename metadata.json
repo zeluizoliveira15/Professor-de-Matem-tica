@@ -1,0 +1,13 @@
+{
+  "name": "Copy of Copy 3 of Professor de Matemática AI",
+  "short_name": "Prof Math",
+  "description": "Assistente inteligente ultra-rápido para resolução de exatas via IA.",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#f8fafc",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

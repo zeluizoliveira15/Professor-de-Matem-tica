@@ -1,0 +1,12 @@
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build]
+  publish = "."
+  command = "echo 'No build step required for simple ESM apps'"
+
+[build.environment]
+  NODE_VERSION = "20"
