@@ -2,14 +2,17 @@
 import { GoogleGenAI, Type, GenerateContentResponse, Modality } from "@google/genai";
 import { ResponseMode } from "../types";
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Helper para obter a instância do AI com a chave de ambiente
+const getAI = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API_KEY não encontrada. Verifique as variáveis de ambiente no Netlify.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
-/**
- * Função para remover caracteres indesejados e limpar a formatação
- */
 const cleanOutput = (text: string): string => {
   if (!text) return "";
-  // Remove rigorosamente asteriscos, cifrões e marcadores de formatação
   return text
     .replace(/[\$\*\_\#]/g, '')
     .replace(/\\\[/g, '')
@@ -27,20 +30,8 @@ export const solveFromImage = async (
   const ai = getAI();
   const model = thinking ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview';
   
-  const simplePrompt = `ATUE COMO UM RESOLVEDOR DIRETO (MODO SIMPLES).
-  Analise o problema na imagem e forneça APENAS o resultado final.
-  REGRAS:
-  1. PROIBIDO símbolos como '$', '*', '_' ou '#'.
-  2. SEM EXPLICAÇÃO. Apenas o valor ou resposta direta.
-  3. Use texto puro (ex: x^2).`;
-
-  const explainedPrompt = `ATUE COMO UM RESOLVEDOR DIRETO (MODO EXPLICAÇÃO).
-  Analise o problema na imagem e forneça o resultado seguido de uma explicação curta.
-  REGRAS:
-  1. PROIBIDO símbolos como '$', '*', '_' ou '#'.
-  2. RESPOSTA DIRETA: Comece com o resultado.
-  3. EXPLICAÇÃO CURTA: Máximo de 2 frases curtas sobre o processo.
-  4. Use texto puro.`;
+  const simplePrompt = `ATUE COMO UM RESOLVEDOR DIRETO (MODO SIMPLES). Forneça APENAS o resultado. PROIBIDO símbolos como '$', '*', '_' ou '#'.`;
+  const explainedPrompt = `ATUE COMO UM RESOLVEDOR DIRETO (MODO EXPLICAÇÃO). Forneça o resultado e uma explicação curta de 2 frases. PROIBIDO símbolos como '$', '*', '_' ou '#'.`;
 
   const prompt = mode === ResponseMode.SIMPLE ? simplePrompt : explainedPrompt;
 
@@ -67,8 +58,8 @@ export const chatWithProfessor = async (
 ): Promise<string> => {
   const ai = getAI();
   const instruction = mode === ResponseMode.SIMPLE 
-    ? 'Você é um resolvedor ultradireto (Modo Simples). Forneça APENAS a resposta final. Sem símbolos como $ ou *.' 
-    : 'Você é um resolvedor direto (Modo Explicação). Forneça a resposta e uma explicação de no máximo 2 frases. Sem símbolos como $ ou *.';
+    ? 'Resolva diretamente sem explicações ou símbolos.' 
+    : 'Resolva e explique brevemente sem símbolos.';
 
   const chat = ai.chats.create({
     model: 'gemini-3-pro-preview',
